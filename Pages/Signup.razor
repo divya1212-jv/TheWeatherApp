@@ -1,0 +1,88 @@
+﻿@page "/signup"
+@using MudBlazor
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject Supabase.Client SupabaseClient
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+
+<div class="register-container mt-15">
+    <MudCard Class="register-card">
+        <MudStack Spacing="3" JustifyContent="Center">
+            <MudText Typo="Typo.h5" Align="Align.Center" Class="title">Create Account</MudText>
+
+            <!-- Input Fields -->
+            <MudTextField Label="Full Name" @bind-Value="Name" Placeholder="Enter your name" Required="true" Variant="Variant.Outlined" Class="input-field" />
+            <MudTextField Label="Email" @bind-Value="Email" Placeholder="Enter your email" InputType="InputType.Email" Required="true" Variant="Variant.Outlined" Class="input-field" />
+            <MudTextField Label="Password" @bind-Value="Password" Placeholder="Enter your password" InputType="InputType.Password" Required="true" Variant="Variant.Outlined" Class="input-field" />
+            <MudTextField Label="Confirm Password" @bind-Value="ConfirmPassword" Placeholder="Re-enter your password" InputType="InputType.Password" Required="true" Variant="Variant.Outlined" Class="input-field" />
+
+            <!-- Buttons -->
+            <MudButton OnClick="RegisterUser" Variant="Variant.Filled" Color="Color.Primary" Class="register-button">Register</MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="NavigateToLogin" Class="back-to-login-button">Back to Login</MudButton>
+
+            <!-- Error Message -->
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <MudText Color="Color.Error" Align="Align.Center" Class="error-message">@ErrorMessage</MudText>
+            }
+        </MudStack>
+    </MudCard>
+</div>
+
+@code {
+    // Properties
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public string ConfirmPassword { get; set; } = string.Empty;
+    public string ErrorMessage { get; set; } = string.Empty;
+
+    // Register User Method
+
+    // Navigate to Login Page
+    private void NavigateToLogin()
+    {
+        Navigation.NavigateTo("/login");
+    }
+    private async Task RegisterUser()
+    {
+        // Validate password match
+        if (Password != ConfirmPassword)
+        {
+            ErrorMessage = "Passwords do not match.";
+            return;
+        }
+
+        try
+        {
+            // Perform signup using Supabase
+            var response = await SupabaseClient.Auth.SignUp(Email, Password, new Supabase.Gotrue.SignUpOptions
+                {
+                    Data = new Dictionary<string, object>
+            {
+                { "name", Name }
+            }
+                });
+
+            if (response?.User != null)
+            {
+                Snackbar.Add("Registration Successful. Please verify your email.", Severity.Success);
+
+                // Optionally store data locally
+                await LocalStorage.SetItemAsync("user_name", Name);
+                await LocalStorage.SetItemAsync("user_email", Email);
+
+                Navigation.NavigateTo("/login");
+            }
+            else
+            {
+                ErrorMessage = "Registration failed. Please try again.";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error: {ex.Message}";
+        }
+    }
+
+}

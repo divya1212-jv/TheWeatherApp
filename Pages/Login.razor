@@ -1,0 +1,72 @@
+﻿@page "/login"
+@using MudBlazor
+@using Blazored.LocalStorage
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject Supabase.Client SupabaseClient
+@inject ILocalStorageService LocalStorage
+
+<PageTitle>Login</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-10 p-6" Style="background-color: #f5f5f5; border-radius: 8px;margin-top: 10% !important;">
+    <h3 class="mb-4" style="color: #1a145d;">Login</h3>
+
+    
+    <MudTextField @bind-Value="Email" Label="Email ID" Variant="Variant.Text" Margin="Margin.Dense" InputType="InputType.Email" />
+
+    
+    <MudTextField @bind-Value="Password" Label="Password" Variant="Variant.Text"
+                  InputType="(PasswordInput ? InputType.Password : InputType.Text)"
+                  Adornment="Adornment.End"
+                  AdornmentIcon="PasswordInputIcon"
+                  OnAdornmentClick="ButtonTestclick"
+                  AdornmentAriaLabel="Show Password" Margin="Margin.Dense" />
+     @* buttons *@
+    <MudButton OnClick="LoginButton" Variant="Variant.Filled" Color="Color.Primary" Class="mt-4">Login</MudButton>
+
+    <MudButton OnClick="Sign" Variant="Variant.Filled" Color="Color.Secondary" Class="mt-4">SignUp</MudButton>
+</MudContainer>
+
+@code {
+    public string Password { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public bool PasswordInput = true;
+    public string PasswordInputIcon => PasswordInput ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
+
+    void ButtonTestclick() => PasswordInput = !PasswordInput;
+
+    public async Task LoginButton()
+    {
+        try
+        {
+            // Check if fields are empty
+            if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
+            {
+                Snackbar.Add("Please enter both email and password.", Severity.Error);
+                return;
+            }
+
+            // Attempt to login using Supabase
+            var response = await SupabaseClient.Auth.SignInWithPassword(Email, Password);
+
+            if (response!.User != null)
+            {
+                Snackbar.Add("Login successful! Redirecting to weather page...", Severity.Success);
+                await LocalStorage.SetItemAsync("Email", Email);
+                await LocalStorage.SetItemAsync("LoginStatus", "Success");
+
+                Navigation.NavigateTo("/weather");
+            }
+            else
+            {
+                Snackbar.Add("Invalid login credentials. Please check your email and password.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+    }
+
+    public void Sign() => Navigation.NavigateTo("/signup");
+}

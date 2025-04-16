@@ -1,0 +1,36 @@
+﻿@page "/profile"
+@using MudBlazor
+@using Blazored.LocalStorage
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager Navigation
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-10 p-6" Style="border-radius: 8px;">
+    <MudText Typo="Typo.h3" Class="mb-4" Color="Color.Primary">Profile</MudText>
+
+    <MudText><strong>Email:</strong> @Email</MudText>
+    <MudText><strong>Login Status:</strong> @LoginStatus</MudText>
+
+    <MudButton OnClick="Logout" Color="Color.Error" Class="mt-4">Logout</MudButton>
+</MudContainer>
+
+@code {
+    public string Email { get; set; } = "Loading...";
+    public string LoginStatus { get; set; } = "Loading...";
+
+    // Load Data from Local Storage on Page Initialization
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch Email and Login Status
+        Email = await LocalStorage.GetItemAsync<string>("Email") ?? "No Email Found";
+        LoginStatus = await LocalStorage.GetItemAsync<string>("LoginStatus") ?? "Not Logged In";
+    }
+
+    // Logout Function
+    private async Task Logout()
+    {
+        await LocalStorage.RemoveItemAsync("Email");
+        await LocalStorage.RemoveItemAsync("LoginStatus");
+
+        Navigation.NavigateTo("/login"); // Redirect to login page
+    }
+}

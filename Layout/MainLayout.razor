@@ -1,0 +1,149 @@
+﻿@inherits LayoutComponentBase
+@using MudBlazor
+@using Microsoft.AspNetCore.Components
+@inject NavigationManager Navigation
+
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+
+    <!-- AppBar with modern gradient background -->
+    <MudAppBar Elevation="1" Color="Color.Primary" Class="gradient-appbar">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
+        <MudSpacer />
+        <NavLink href="/login" class="nav-link">Login&nbsp;&nbsp;</NavLink>
+
+        <MudMenu Icon="@Icons.Material.Filled.Settings"
+                 Color="Color.Primary"
+                 Size="Size.Small"
+                 AriaLabel="Open user menu">
+            <MudMenuItem OnClick="NavigateToProfile" Class="topItems">
+                <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" Class="mr-1" />
+                Profile
+            </MudMenuItem>
+            <MudMenuItem OnClick="PerformLogout" Class="topItems">
+                <MudIcon Icon="@Icons.Material.Filled.Logout" Size="Size.Small" Class="mr-1" />
+                Logout
+            </MudMenuItem>
+        </MudMenu>
+    </MudAppBar>
+
+    <!-- Drawer with gradient and nav items -->
+    <MudDrawer @bind-Open="_drawerOpen" Elevation="2" Class="gradient-drawer">
+        <MudDrawerHeader>
+            <MudText Typo="Typo.h5" Class="mt-1 text-white">WeatherApp</MudText>
+        </MudDrawerHeader>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/home" Match="NavLinkMatch.All">
+                @* ✅ Points to Home.razor *@
+                <MudIcon Icon="@Icons.Material.Filled.Home" Class="mr-2" />
+                <span>Home</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/weather">
+                @* ✅ Points to Weather.razor *@
+                <MudIcon Icon="@Icons.Material.Filled.WbSunny" Class="mr-2" />
+                <span>Weather Forecast</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/favorite">
+                @* ✅ Placeholder for future Favs.razor *@
+                <MudIcon Icon="@Icons.Material.Filled.Favorite" Class="mr-2" />
+                <span>Favorites</span>
+            </NavLink>
+        </div>
+
+    </MudDrawer>
+
+    <!-- Main content -->
+    <MudMainContent Class="main-content">
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+<style>
+    html, body {
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .gradient-appbar {
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+    }
+
+    .gradient-drawer {
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        border-bottom-right-radius: 50px;
+    }
+
+    .main-content {
+        padding: 20px;
+        background-color: #f5f5f5;
+        min-height: 100vh;
+    }
+
+    .nav-item {
+        margin: 10px 0;
+    }
+
+    .nav-link {
+        display: flex;
+        align-items: center;
+        padding: 10px 15px;
+        border-radius: 8px;
+        color: #fff;
+        text-decoration: none;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+        .nav-link:hover {
+            background-color: white;
+            transform: translateX(5px);
+                        color: #1e3c72;
+        }
+
+        .nav-link.active {
+            background-color: white;
+            color: #1e3c72;
+        }
+
+    .topItems {
+        padding: 10px;
+    }
+
+    .text-white {
+        color: white;
+    }
+
+    .mud-icon {
+        font-size: 1.2rem;
+    }
+</style>
+
+@code {
+    private bool _drawerOpen = false;
+
+    private void ToggleDrawer()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    private void NavigateToProfile()
+    {
+        Navigation.NavigateTo("/profile");
+    }
+
+    private void PerformLogout()
+    {
+        Navigation.NavigateTo("/login");
+    }
+}

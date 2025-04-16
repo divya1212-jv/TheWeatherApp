@@ -1,0 +1,252 @@
+﻿@page "/weather"
+@using MudBlazor
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<PageTitle>Weather</PageTitle>
+
+<div class="questionDiv">
+    <h3>Enter the City Name</h3>
+    <MudTextField @bind-Value="CityName"
+    Label="City Name"
+    Placeholder="Enter the city name"
+    Variant="Variant.Outlined"
+    Class="mb-3"
+    Style="width: 60%; max-width: 600px;" />
+
+    <MudButton OnClick="SubmitCity" Variant="Variant.Filled" Color="Color.Primary" Style="margin-right: 10px;">Current Weather</MudButton>
+    <MudButton OnClick="Forecast" Variant="Variant.Filled" Color="Color.Secondary" Style="margin-right: 5px;margin-top: 10px;">Weather Forecast</MudButton>
+    <MudButton OnClick="GetLocationWeather" Variant="Variant.Filled" Color="Color.Tertiary" Style="margin-top: 10px;">Get Current Location Weather</MudButton>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(ResultMessage))
+{
+    <MudAlert Severity="Severity.Error" Class="mt-3">@ResultMessage</MudAlert>
+}
+
+@if (WeatherData != null && !IsForecastMode)
+{
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 20px;">
+        <MudCard Class="weather-card">
+            <h4>Weather Details</h4>
+            <p><strong>City Name:</strong> @WeatherData.Name</p>
+            <p><strong>Temperature (°C):</strong> @WeatherData.Main.Temp</p>
+            <p><strong>Humidity (%):</strong> @WeatherData.Main.Humidity</p>
+            @if (WeatherData.Weather.Any())
+            {
+                <p><strong>Weather Description:</strong> @WeatherData.Weather.First().Description</p>
+            }
+        </MudCard>
+    </div>
+}
+
+@if (ForecastData != null && IsForecastMode && ForecastData.List.Count > 0)
+{
+    <h4>5-Day Weather Forecast</h4>
+    <div style="display: flex; gap: 15px; overflow-x: auto;">
+        @foreach (var forecastItem in ForecastData.List.Take(5))
+        {
+            <MudCard Class="weather-card">
+                <p><strong>Date:</strong> @forecastItem.DateTime.ToString("ddd, MMM dd")</p>
+                <p><strong>Temperature (°C):</strong> @forecastItem.Main.Temp</p>
+                <p><strong>Humidity (%):</strong> @forecastItem.Main.Humidity</p>
+                @if (forecastItem.Weather.Any())
+                {
+                    <p><strong>Description:</strong> @forecastItem.Weather.First().Description</p>
+                }
+            </MudCard>
+        }
+    </div>
+}
+
+<style>
+    .weather-card {
+    max-width: 400px;
+    background-color: #5e7a9b;
+    color: white;
+    padding: 25px;
+    border-radius: 8px;
+        margin-left: 2%;
+        /* margin-top: 5%; */
+    box-shadow: 5px 9px 20px rgba(0, 0, 1, 1);
+    }
+
+    .questionDiv {
+    max-width: 400px;
+    color: white;
+    padding: 25px;
+    margin-left: 35%;
+    margin-top: 10%;
+    border-radius: 8px;
+    box-shadow: 5px 9px 20px rgba(0, 0, 1, 1);
+    }
+</style>
+
+@code {
+    public string CityName { get; set; } = string.Empty;
+    public string ResultMessage { get; set; } = string.Empty;
+    public WeatherResponse? WeatherData { get; set; }
+    public ForecastResponse? ForecastData { get; set; }
+    private bool IsForecastMode = false;
+    private readonly string ApiKey = "652e22ec6b105398e8c2edd80bc697e8"; // API Key
+
+
+    private bool _firstRender = true;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_firstRender)
+        {
+            _firstRender = false;
+            await GetLocationWeather();
+            StateHasChanged(); // Ensures UI updates after location weather is fetched
+        }
+    }
+
+
+    private async Task SubmitCity()
+    {
+        if (string.IsNullOrWhiteSpace(CityName))
+        {
+            ResultMessage = "Please enter a valid city name.";
+            WeatherData = null;
+            ForecastData = null;
+            return;
+        }
+
+        try
+        {
+            var response = await Http.GetAsync($"https://api.openweathermap.org/data/2.5/weather?q={CityName}&appid={ApiKey}&units=metric");
+
+            if (response.IsSuccessStatusCode)
+            {
+                WeatherData = await response.Content.ReadFromJsonAsync<WeatherResponse>();
+                ForecastData = null; // Clear forecast
+                IsForecastMode = false; // Switch to weather mode
+                ResultMessage = string.Empty;
+            }
+            else
+            {
+                ResultMessage = $"City not found. Status Code: {response.StatusCode}";
+                WeatherData = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            ResultMessage = $"Error fetching weather data: {ex.Message}";
+            WeatherData = null;
+        }
+    }
+
+    private async Task Forecast()
+    {
+        if (string.IsNullOrWhiteSpace(CityName))
+        {
+            ResultMessage = "Please enter a valid city name.";
+            ForecastData = null;
+            return;
+        }
+
+        try
+        {
+            var response = await Http.GetAsync($"https://api.openweathermap.org/data/2.5/forecast?q={CityName}&appid={ApiKey}&units=metric");
+
+            if (response.IsSuccessStatusCode)
+            {
+                ForecastData = await response.Content.ReadFromJsonAsync<ForecastResponse>();
+                WeatherData = null; // Clear current weather
+                IsForecastMode = true; // Switch to forecast mode
+                ResultMessage = string.Empty;
+            }
+            else
+            {
+                ResultMessage = $"City not found. Status Code: {response.StatusCode}";
+                ForecastData = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            ResultMessage = $"Error fetching forecast data: {ex.Message}";
+            ForecastData = null;
+        }
+    }
+
+    private async Task GetLocationWeather()
+    {
+        try
+        {
+            var location = await JS.InvokeAsync<Location>("getLocation");
+
+            if (location != null)
+            {
+                var response = await Http.GetAsync($"https://api.openweathermap.org/data/2.5/weather?lat={location.Latitude}&lon={location.Longitude}&appid={ApiKey}&units=metric");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    WeatherData = await response.Content.ReadFromJsonAsync<WeatherResponse>();
+                    ForecastData = null; // Reset forecast on location change
+                    IsForecastMode = false; // Show only current weather
+                    ResultMessage = string.Empty;
+                    StateHasChanged(); // Force UI update
+                }
+                else
+                {
+                    ResultMessage = $"Unable to fetch weather data for your location. Status Code: {response.StatusCode}";
+                    WeatherData = null;
+                }
+                StateHasChanged(); // Force UI update
+            }
+            else
+            {
+                ResultMessage = "Unable to retrieve your location.";
+                WeatherData = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            ResultMessage = $"Error fetching location data: {ex.Message}";
+            WeatherData = null;
+        }
+    }
+
+    public class Location
+    {
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+    }
+
+    public class WeatherResponse
+    {
+        public string Name { get; set; } = string.Empty;
+        public Main Main { get; set; } = new Main();
+        public List<WeatherInfo> Weather { get; set; } = new List<WeatherInfo>();
+    }
+
+
+    public class LocationData
+    {
+        public string? name { get; set; }
+    }
+    public class ForecastResponse
+    {
+        public List<ForeFive> List { get; set; } = new List<ForeFive>();
+    }
+
+    public class ForeFive
+    {
+        public Main Main { get; set; } = new Main();
+        public List<WeatherInfo> Weather { get; set; } = new List<WeatherInfo>();
+        public DateTime DateTime { get; set; }
+    }
+
+    public class Main
+    {
+        public float Temp { get; set; }
+        public int Humidity { get; set; }
+    }
+
+    public class WeatherInfo
+    {
+        public string Description { get; set; } = string.Empty;
+    }
+}
