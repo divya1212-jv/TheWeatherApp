@@ -5,44 +5,52 @@
 
 <PageTitle>Weather</PageTitle>
 
-<div class="questionDiv">
-    <h3>Enter the City Name</h3>
-    <MudTextField @bind-Value="CityName"
-    Label="City Name"
-    Placeholder="Enter the city name"
-    Variant="Variant.Outlined"
-    Class="mb-3"
-    Style="width: 60%; max-width: 600px;" />
+<div class="weatherLayout">
+    <div class="questionDiv">
+        <h3>Enter the City Name</h3>
+        <MudTextField @bind-Value="CityName"
+                      Label="City Name"
+                      Placeholder="Enter the city name"
+                      Variant="Variant.Outlined"
+                      Class="mb-3"
+                      Style="width: 100%;color:white"
+                      />
 
-    <MudButton OnClick="SubmitCity" Variant="Variant.Filled" Color="Color.Primary" Style="margin-right: 10px;">Current Weather</MudButton>
-    <MudButton OnClick="Forecast" Variant="Variant.Filled" Color="Color.Secondary" Style="margin-right: 5px;margin-top: 10px;">Weather Forecast</MudButton>
-    <MudButton OnClick="GetLocationWeather" Variant="Variant.Filled" Color="Color.Tertiary" Style="margin-top: 10px;">Get Current Location Weather</MudButton>
-</div>
-
-@if (!string.IsNullOrWhiteSpace(ResultMessage))
-{
-    <MudAlert Severity="Severity.Error" Class="mt-3">@ResultMessage</MudAlert>
-}
-
-@if (WeatherData != null && !IsForecastMode)
-{
-    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 20px;">
-        <MudCard Class="weather-card">
-            <h4>Weather Details</h4>
-            <p><strong>City Name:</strong> @WeatherData.Name</p>
-            <p><strong>Temperature (°C):</strong> @WeatherData.Main.Temp</p>
-            <p><strong>Humidity (%):</strong> @WeatherData.Main.Humidity</p>
-            @if (WeatherData.Weather.Any())
-            {
-                <p><strong>Weather Description:</strong> @WeatherData.Weather.First().Description</p>
-            }
-        </MudCard>
+        <MudButton OnClick="SubmitCity" Variant="Variant.Filled" Color="Color.Primary" Style="margin-right: 10px;" class="weather-container">Current Weather</MudButton>
+        <MudButton OnClick="Forecast" Variant="Variant.Filled" Color="Color.Secondary" Style="margin-right: 5px;margin-top: 10px;">Weather Forecast</MudButton>
+        <MudButton OnClick="GetLocationWeather" Variant="Variant.Filled" Color="Color.Tertiary" Style="margin-top: 10px;">Get Current Location Weather</MudButton>
     </div>
-}
+    @if (!string.IsNullOrWhiteSpace(ResultMessage))
+    {
+        <MudAlert Severity="Severity.Error" Class="mt-3">@ResultMessage</MudAlert>
+    }
+
+    @if (WeatherData != null && !IsForecastMode)
+    {
+        <div class="cardWrapper">
+            <MudCard Class="weather-card">
+                <h4>Weather Details</h4>
+                @* <p><strong>City Name:</strong> @WeatherData.Name</p> *@
+                <p>
+                    <strong>City Name:</strong> @WeatherData.Name
+                    <MudTooltip Text="Add to Favourite">
+                        <MudIcon Icon="@Icons.Material.Filled.Favorite" Style="color: red; cursor: pointer; margin-left:50%;" />
+                    </MudTooltip>
+                </p>
+                <p><strong>Temperature (°C):</strong> @WeatherData.Main.Temp</p>
+                <p><strong>Humidity (%):</strong> @WeatherData.Main.Humidity</p>
+                @if (WeatherData.Weather.Any())
+                {
+                    <p><strong>Weather Description:</strong> @WeatherData.Weather.First().Description</p>
+                }
+            </MudCard>
+        </div>
+    }
+</div>
 
 @if (ForecastData != null && IsForecastMode && ForecastData.List.Count > 0)
 {
-    <h4>5-Day Weather Forecast</h4>
+    <h4 class="sideHeading">5-Day Weather Forecast</h4>
     <div style="display: flex; gap: 15px; overflow-x: auto;">
         @foreach (var forecastItem in ForecastData.List.Take(5))
         {
@@ -60,26 +68,49 @@
 }
 
 <style>
-    .weather-card {
-    max-width: 400px;
-    background-color: #5e7a9b;
-    color: white;
-    padding: 25px;
-    border-radius: 8px;
-        margin-left: 2%;
-        /* margin-top: 5%; */
-    box-shadow: 5px 9px 20px rgba(0, 0, 1, 1);
+    .weatherLayout {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        padding: 20px;
+        gap: 30px;
+       
     }
 
     .questionDiv {
-    max-width: 400px;
-    color: white;
-    padding: 25px;
-    margin-left: 35%;
-    margin-top: 10%;
-    border-radius: 8px;
-    box-shadow: 5px 9px 20px rgba(0, 0, 1, 1);
+        width: 100%;
+        max-width: 400px;
+        color: white !important;
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 5px 9px 20px rgba(0, 0, 1, 1);
+        background-color: #313e57;
+        margin-top: 4%;
     }
+
+    .cardWrapper {
+        flex: 1;
+        min-width: 300px;
+        margin-top:5%;
+        display: center;
+        padding:20px; 
+        justify-content: flex-end;
+        /* color: white !important; */
+    }
+
+    .weather-card {
+        max-width: 400px;
+        background-color: #5e7a9b;
+        color: white;
+        padding: 25px; /* ✅ this is the correct place */
+        border-radius: 8px;
+        /* margin-left: 2%; */
+        display: flex;
+        box-shadow: 5px 9px 20px rgba(0, 0, 1, 1);
+        margin-top:4%;
+    }
+
 </style>
 
 @code {
