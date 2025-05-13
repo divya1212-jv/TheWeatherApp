@@ -20,7 +20,7 @@
 
         <MudButton OnClick="SubmitCity" Variant="Variant.Filled" Color="Color.Primary" Style="margin-right: 10px;" class="weather-container">Current Weather</MudButton>
         <MudButton OnClick="Forecast" Variant="Variant.Filled" Color="Color.Secondary" Style="margin-right: 5px;margin-top: 10px;">Weather Forecast</MudButton>
-        <MudButton OnClick="GetLocationWeather" Variant="Variant.Filled" Color="Color.Tertiary" Style="margin-top: 10px;">Get Current Location Weather</MudButton>
+        @* <MudButton OnClick="GetLocationWeather" Variant="Variant.Filled" Color="Color.Tertiary" Style="margin-top: 10px;">Get Current Location Weather</MudButton> *@
     </div>
     @if (!string.IsNullOrWhiteSpace(ResultMessage))
     {
