@@ -32,7 +32,7 @@
         <div class="cardWrapper">
             <MudCard Class="weather-card">
                 <h4>Weather Details</h4>
-                @* <p><strong>City Name:</strong> @WeatherData.Name</p> *@
+              
                 <p>
                     <strong>City Name:</strong> @WeatherData.Name
                     <MudTooltip Text="Add to Favourite">
@@ -98,16 +98,14 @@
         display: center;
         padding:20px; 
         justify-content: flex-end;
-        /* color: white !important; */
     }
 
     .weather-card {
         max-width: 400px;
         background-color: #5e7a9b;
         color: white;
-        padding: 25px; /* ✅ this is the correct place */
+        padding: 25px; 
         border-radius: 8px;
-        /* margin-left: 2%; */
         display: flex;
         box-shadow: 5px 9px 20px rgba(0, 0, 1, 1);
         margin-top:4%;
@@ -121,8 +119,7 @@
     public WeatherResponse? WeatherData { get; set; }
     public ForecastResponse? ForecastData { get; set; }
     private bool IsForecastMode = false;
-    private readonly string ApiKey = "652e22ec6b105398e8c2edd80bc697e8"; // API Key
-
+    private readonly string ApiKey = "652e22ec6b105398e8c2edd80bc697e8"; 
 
     private bool _firstRender = true;
 
@@ -132,7 +129,7 @@
         {
             _firstRender = false;
             await GetLocationWeather();
-            StateHasChanged(); // Ensures UI updates after location weather is fetched
+            StateHasChanged();
         }
     }
 
@@ -154,8 +151,8 @@
             if (response.IsSuccessStatusCode)
             {
                 WeatherData = await response.Content.ReadFromJsonAsync<WeatherResponse>();
-                ForecastData = null; // Clear forecast
-                IsForecastMode = false; // Switch to weather mode
+                ForecastData = null;
+                IsForecastMode = false; 
                 ResultMessage = string.Empty;
             }
             else
@@ -187,8 +184,8 @@
             if (response.IsSuccessStatusCode)
             {
                 ForecastData = await response.Content.ReadFromJsonAsync<ForecastResponse>();
-                WeatherData = null; // Clear current weather
-                IsForecastMode = true; // Switch to forecast mode
+                WeatherData = null; 
+                IsForecastMode = true; 
                 ResultMessage = string.Empty;
             }
             else
@@ -217,17 +214,17 @@
                 if (response.IsSuccessStatusCode)
                 {
                     WeatherData = await response.Content.ReadFromJsonAsync<WeatherResponse>();
-                    ForecastData = null; // Reset forecast on location change
-                    IsForecastMode = false; // Show only current weather
+                    ForecastData = null; 
+                    IsForecastMode = false; 
                     ResultMessage = string.Empty;
-                    StateHasChanged(); // Force UI update
+                    StateHasChanged(); 
                 }
                 else
                 {
                     ResultMessage = $"Unable to fetch weather data for your location. Status Code: {response.StatusCode}";
                     WeatherData = null;
                 }
-                StateHasChanged(); // Force UI update
+                StateHasChanged(); 
             }
             else
             {

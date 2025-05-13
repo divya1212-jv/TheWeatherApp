@@ -10,7 +10,7 @@
 
 <MudLayout>
 
-    <!-- AppBar with modern gradient background -->
+
     <MudAppBar Elevation="1" Color="Color.Primary" Class="gradient-appbar">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
         <MudSpacer />
@@ -31,14 +31,14 @@
         </MudMenu>
     </MudAppBar>
 
-    <!-- Drawer with gradient and nav items -->
+
     <MudDrawer @bind-Open="_drawerOpen" Elevation="2" Class="gradient-drawer">
         <MudDrawerHeader>
             <MudText Typo="Typo.h5" Class="mt-1 text-white">WeatherApp</MudText>
         </MudDrawerHeader>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="/home" Match="NavLinkMatch.All">
-                @* ✅ Points to Home.razor *@
+               
                 <MudIcon Icon="@Icons.Material.Filled.Home" Class="mr-2" />
                 <span>Home</span>
             </NavLink>
@@ -46,7 +46,7 @@
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="/weather">
-                @* ✅ Points to Weather.razor *@
+            
                 <MudIcon Icon="@Icons.Material.Filled.WbSunny" Class="mr-2" />
                 <span>Weather Forecast</span>
             </NavLink>
@@ -54,7 +54,7 @@
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="/favorite">
-                @* ✅ Placeholder for future Favs.razor *@
+               
                 <MudIcon Icon="@Icons.Material.Filled.Favorite" Class="mr-2" />
                 <span>Favorites</span>
             </NavLink>
@@ -62,7 +62,7 @@
 
     </MudDrawer>
 
-    <!-- Main content -->
+ 
     <MudMainContent Class="main-content">
         @Body
     </MudMainContent>

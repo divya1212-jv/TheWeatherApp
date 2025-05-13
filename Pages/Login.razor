@@ -39,14 +39,12 @@
     {
         try
         {
-            // Check if fields are empty
             if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
             {
                 Snackbar.Add("Please enter both email and password.", Severity.Error);
                 return;
             }
 
-            // Attempt to login using Supabase
             var response = await SupabaseClient.Auth.SignInWithPassword(Email, Password);
 
             if (response!.User != null)
